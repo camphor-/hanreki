@@ -1,0 +1,131 @@
+require 'csv'
+require 'date'
+require 'json'
+require 'hanreki/event'
+require 'hanreki/i_calendar'
+require 'hanreki/time_util'
+
+# Schedule for CAMPHOR- HOUSE assignments and other events
+class Schedule
+  using ExtendTime
+  ICAL_PUBLIC_PATH = 'ical/camphor_public_events.ics'
+  ICAL_PRIVATE_PATH = 'ical/camphor_private_events.ics'
+  JSON_PUBLIC_PATH = 'json/camphor_public_events.json'
+  JSON_PRIVATE_PATH = 'json/camphor_private_events.json'
+  JSONP_PUBLIC_PATH = 'jsonp/camphor_public_events.js'
+  JSONP_PRIVATE_PATH = 'jsonp/camphor_private_events.js'
+
+  def initialize
+    # マスターファイルを生成する際のファイル名の決定に使用
+    @first_day_of_month = nil
+    @events = []
+  end
+
+  # 指定された月の初期割り当てを @events に設定する
+  def self.initialize_for_month(year, month)
+    schedule = Schedule.new
+    schedule.send(:initialize_assignments, year, month)
+    schedule
+  end
+
+  # マスターファイルを読み込んで @events に設定する
+  def load_master_files
+    @events = Dir.glob('master/*.csv').flat_map do |f|
+      month = f.match(/master\/(\d+).csv/)[1]
+      CSV.open(f, headers: true) do |csv|
+        csv.map { |line| Event.from_master(month, line) }
+      end
+    end
+  end
+
+  # Output private and public iCal calendar files
+  def out_ical
+    File.open(ICAL_PUBLIC_PATH, 'w') do |f|
+      ical = ICalendar.new
+      public_events.each { |event| ical.set_event(event, :public) }
+      f.write(ical)
+    end
+    File.open(ICAL_PRIVATE_PATH, 'w') do |f|
+      ical = ICalendar.new
+      private_events.each { |event| ical.set_event(event, :private) }
+      f.write(ical)
+    end
+  end
+
+  # Output private and public JSON calendar files
+  def out_json
+    File.open(JSON_PUBLIC_PATH, 'w') do |f|
+      JSON.dump(public_events.map { |event| event.to_h(:public, :string) } , f)
+    end
+    File.open(JSON_PRIVATE_PATH, 'w') do |f|
+      JSON.dump(private_events.map { |event| event.to_h(:private, :string) } , f)
+    end
+  end
+
+  # Output private and public JSONP calendar files
+  def out_jsonp(callback = 'callback')
+    File.open(JSONP_PUBLIC_PATH, 'w') do |f|
+      events = public_events.map { |event| event.to_h(:public, :string) }
+      f.write("#{callback}(#{events.to_json});")
+    end
+    File.open(JSONP_PRIVATE_PATH, 'w') do |f|
+      events = private_events.map { |event| event.to_h(:private, :string) }
+      f.write("#{callback}(#{events.to_json});")
+    end
+  end
+
+  # Output master file
+  def out_master
+    CSV.open(
+      file_path, 'w',
+      headers: Event.master_header, write_headers: true
+    ) do |master_file|
+      @events.each { |event| master_file << event.to_master }
+    end
+  end
+
+  def master_file_exists?
+    File.exists? file_path
+  end
+
+  private
+
+  def file_path
+    "master/#{@first_day_of_month.strftime('%Y%m')}.csv".freeze
+  end
+
+  def initialize_assignments(year, month)
+    @first_day_of_month =
+      begin
+        Date.new(year, month, 1)
+      rescue TypeError
+        raise ArgumentError, 'Invalid year and month'
+      end
+
+    days = @first_day_of_month...@first_day_of_month.next_month
+    @events = days.map { |day| default_assignment(day) }
+  end
+
+  def default_assignment(date)
+    # Set timezone explicitly (DO NOT use date.to_time, it uses local timezone)
+    time = Time.new(date.year, date.month, date.day, 0, 0, 0, '+09:00')
+    start, _end, public_summary, private_summary =
+      case time.wday
+      when 0 then [time.next_day(0), time.next_day(1), '', 'Closed']
+      when 1..5 then [time.next_hour(15), time.next_hour(20), 'Open', '@']
+      when 6 then [time.next_hour(13), time.next_hour(20), 'Open', '@']
+      end
+    Event.new(
+      start: start, end: _end,
+      public_summary: public_summary,
+      private_summary: private_summary)
+  end
+
+  def public_events
+    @events.select(&:public?)
+  end
+
+  def private_events
+    @events.select(&:private?)
+  end
+end
