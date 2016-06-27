@@ -1,0 +1,8 @@
+machine:
+  timezone:
+    UTC
+  ruby:
+    version: 2.1.5
+dependencies:
+  pre:
+    - gem install bundler
