@@ -1,8 +1,8 @@
 # Hanreki
 
-Simple schedule manager for [CAMPHOR-](https://camph.net/)
+[![Build Status](https://travis-ci.org/camphor-/hanreki.svg?branch=master)](https://travis-ci.org/camphor-/hanreki)
 
-TODO: Delete this and the text above, and describe your gem
+Simple schedule manager for [CAMPHOR-](https://camph.net/)
 
 ## Installation
 ### Gem
