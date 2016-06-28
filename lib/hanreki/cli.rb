@@ -2,6 +2,7 @@ require 'date'
 require 'thor'
 require 'hanreki/schedule'
 require 'hanreki/time_util'
+require 'hanreki/version'
 
 module Hanreki
   class CLI < Thor
@@ -46,6 +47,12 @@ module Hanreki
         raise "validation error: #{e}"
       end
     end
+
+    desc 'version', 'Show the version information'
+    def version
+      puts "hanreki v#{VERSION}"
+    end
+    map '--version' => :version
 
     private
 
