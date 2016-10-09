@@ -244,6 +244,24 @@ describe Event do
       it { is_expected.to raise_error(ArgumentError) }
     end
 
+    context 'when public summary is "Open"' do
+      before do
+        event.public_summary = 'Open'
+        event.private_summary = '@ymyzk'
+      end
+
+      context 'when start == end' do
+        before do
+          event.start = Time.new(2016, 10, 7, 0, 0, 0, '+09:00')
+          event.end = Time.new(2016, 10, 7, 0, 0, 0, '+09:00')
+        end
+
+        subject { -> { event.validate } }
+
+        it { is_expected.to raise_error(ArgumentError) }
+      end
+    end
+
     context 'when private summary is "Closed"' do
       before do
         event.public_summary = nil

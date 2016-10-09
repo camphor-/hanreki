@@ -85,6 +85,12 @@ class Event
       raise ArgumentError, 'both summaries are not set'
     end
 
+    if @public_summary == 'Open'
+      if @start == @end
+        raise ArgumentError, '"open" event should have duration'
+      end
+    end
+
     if @private_summary == 'Closed'
       if not @public_summary.nil?
         raise ArgumentError, 'invalid public summary for a closed event'
