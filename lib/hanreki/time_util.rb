@@ -2,10 +2,10 @@ require 'time'
 
 # Add some useful methods to Time, provided as refinement
 module ExtendTime
-  refine Time do
-    SECONDS_OF_HOUR = 60 * 60
-    SECONDS_OF_DAY = SECONDS_OF_HOUR * 24
+  SECONDS_OF_HOUR = 60 * 60
+  SECONDS_OF_DAY = SECONDS_OF_HOUR * 24
 
+  refine Time do
     # n 日後の Time を返す
     def next_day(n = 1)
       self + (n * SECONDS_OF_DAY)
