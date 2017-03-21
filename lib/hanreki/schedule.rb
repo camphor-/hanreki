@@ -109,16 +109,11 @@ class Schedule
   def default_assignment(date)
     # Set timezone explicitly (DO NOT use date.to_time, it uses local timezone)
     time = Time.new(date.year, date.month, date.day, 0, 0, 0, '+09:00')
-    start, _end, public_summary, private_summary =
-      case time.wday
-      when 0 then [time.next_day(0), time.next_day(1), '', 'Closed']
-      when 1..5 then [time.next_hour(15), time.next_hour(20), 'Open', '@']
-      when 6 then [time.next_hour(13), time.next_hour(20), 'Open', '@']
-      end
     Event.new(
-      start: start, end: _end,
-      public_summary: public_summary,
-      private_summary: private_summary)
+      start: time,
+      end: time.next_day(1),
+      public_summary: '',
+      private_summary: 'Closed')
   end
 
   def public_events
