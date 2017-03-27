@@ -92,6 +92,22 @@ describe Event do
       it { is_expected.to raise_error(ArgumentError) }
     end
 
+    context 'when invalid day of the week is given' do
+      let(:row) { CSV::Row.new([], ['30', '天', '15:00', '20:00', 'Open', '', 'https://camph.net']) }
+
+      subject { -> { described_class.from_master('201502', row) } }
+
+      it { is_expected.to raise_error(ArgumentError) }
+    end
+
+    context 'when wrong day of the week is given' do
+      let(:row) { CSV::Row.new([], ['28', '水', '15:00', '20:00', 'Open', '', 'https://camph.net']) }
+
+      subject { -> { described_class.from_master('201703', row) } }
+
+      it { is_expected.to raise_error(ArgumentError) }
+    end
+
     context 'when start > end' do
       let(:row) { CSV::Row.new([], ['100', '木', '15:00', '10:00', 'Open', '', 'https://camph.net']) }
 

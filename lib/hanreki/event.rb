@@ -4,7 +4,7 @@ require 'hanreki/time_util'
 # Event of CAMPHOR- Schedule
 class Event
   using ExtendTime
-  WDAYS = %w(日 月 火 水 木 金 土)
+  DOWS = %w(日 月 火 水 木 金 土)
   attr_accessor :start, :end
   attr_accessor :public_summary, :private_summary
   attr_accessor :url
@@ -26,7 +26,7 @@ class Event
   def self.from_master(month, line)
     event = Event.new({})
     first_day = Date.parse("#{month}01")
-    day, _, hour_start, hour_end, public_summary, private_summary, url = line.fields.map { |c| c.to_s.strip }
+    day, dow, hour_start, hour_end, public_summary, private_summary, url = line.fields.map { |c| c.to_s.strip }
     # Zero-fill (eg. 1 -> 01, 02 -> 02)
     day = day.rjust(2, "0")
     raise ArgumentError, 'invalid day' unless day.length == 2
@@ -36,6 +36,9 @@ class Event
     event.public_summary = public_summary unless public_summary.empty?
     event.private_summary = private_summary unless private_summary.empty?
     event.url = url unless url.empty?
+    # 曜日はインスタンス変数に保持しないのでここでチェックする
+    raise ArgumentError, 'invalid day of the week' unless DOWS.include? dow
+    raise ArgumentError, 'invalid day of the week' unless DOWS[event.start.wday] == dow
     event.validate
     event
   end
@@ -61,11 +64,11 @@ class Event
 
   # Format for master CSV files
   def to_master
-    wday = WDAYS[@start.wday]
+    dow = DOWS[@start.wday]
     date_str = @start.strftime('%d')
     start_string = @start.strftime('%R')
     end_string =  @end.strftime('%R')
-    [date_str, wday, start_string, end_string, @public_summary, @private_summary, @url]
+    [date_str, dow, start_string, end_string, @public_summary, @private_summary, @url]
   end
 
   def private?
