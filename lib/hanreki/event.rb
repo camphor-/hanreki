@@ -31,8 +31,8 @@ class Event
     day = day.rjust(2, "0")
     raise ArgumentError, 'invalid day' unless day.length == 2
     raise ArgumentError, 'invalid day' unless (first_day...first_day.next_month).include?(Date.parse("#{month}#{day}"))
-    event.start = Time.parse("#{month}#{day} #{hour_start} +09:00")
-    event.end = Time.parse("#{month}#{day} #{hour_end} +09:00")
+    event.start = Time.parse("#{month}#{day} #{hour_start} +09:00").getlocal("+09:00")
+    event.end = Time.parse("#{month}#{day} #{hour_end} +09:00").getlocal("+09:00")
     event.public_summary = public_summary unless public_summary.empty?
     event.private_summary = private_summary unless private_summary.empty?
     event.url = url unless url.empty?
