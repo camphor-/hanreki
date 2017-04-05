@@ -34,3 +34,6 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 Bug reports and pull requests are welcome on GitHub at https://github.com/camphor-/hanreki.
+
+## Why "hanreki"?
+This application is named after a Japanese word "[頒暦](https://ja.wikipedia.org/wiki/頒暦)".
