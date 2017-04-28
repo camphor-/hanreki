@@ -1,6 +1,7 @@
 require 'csv'
 require 'date'
 require 'json'
+require 'json-schema'
 require 'hanreki/event'
 require 'hanreki/i_calendar'
 require 'hanreki/time_util'
@@ -14,6 +15,7 @@ class Schedule
   JSON_PRIVATE_PATH = 'json/camphor_private_events.json'
   JSONP_PUBLIC_PATH = 'jsonp/camphor_public_events.js'
   JSONP_PRIVATE_PATH = 'jsonp/camphor_private_events.js'
+  JSON_SCHEMA_PATH = File.expand_path('../schema.json', __FILE__)
 
   def initialize
     # マスターファイルを生成する際のファイル名の決定に使用
@@ -55,22 +57,20 @@ class Schedule
   # Output private and public JSON calendar files
   def out_json
     File.open(JSON_PUBLIC_PATH, 'w') do |f|
-      JSON.dump(public_events.map { |event| event.to_h(:public, :string) } , f)
+      f.write(events_to_json(public_events, :public, validate: true))
     end
     File.open(JSON_PRIVATE_PATH, 'w') do |f|
-      JSON.dump(private_events.map { |event| event.to_h(:private, :string) } , f)
+      f.write(events_to_json(private_events, :private, validate: true))
     end
   end
 
   # Output private and public JSONP calendar files
   def out_jsonp(callback = 'callback')
     File.open(JSONP_PUBLIC_PATH, 'w') do |f|
-      events = public_events.map { |event| event.to_h(:public, :string) }
-      f.write("#{callback}(#{events.to_json});")
+      f.write("#{callback}(#{events_to_json(public_events, :public)});")
     end
     File.open(JSONP_PRIVATE_PATH, 'w') do |f|
-      events = private_events.map { |event| event.to_h(:private, :string) }
-      f.write("#{callback}(#{events.to_json});")
+      f.write("#{callback}(#{events_to_json(private_events, :private)});")
     end
   end
 
@@ -122,5 +122,15 @@ class Schedule
 
   def private_events
     @events.select(&:private?)
+  end
+
+  def events_to_json(events, type, validate = false)
+    json = events.map { |event| event.to_h(type, :string) }.to_json
+    validate_json!(json) if validate
+    json
+  end
+
+  def validate_json!(json)
+    JSON::Validator.validate!(JSON_SCHEMA_PATH, json)
   end
 end
