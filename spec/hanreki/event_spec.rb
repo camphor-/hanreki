@@ -116,6 +116,14 @@ describe Event do
       it { is_expected.to raise_error(ArgumentError) }
     end
 
+    context 'when there is an unnecessary column' do
+      let(:row) { CSV::Row.new([], ['15', '木', '15:00', '20:00', 'Open', '', '', 'unnecessary']) }
+
+      subject { -> { described_class.from_master('201510', row) } }
+
+      it { is_expected.to raise_error(ArgumentError) }
+    end
+
     context 'when a public_summary is not set' do
       let(:row) { CSV::Row.new([], ['15', '木', '15:00', '20:00', '', '@ymyzk @tanishiking', 'https://camph.net']) }
 

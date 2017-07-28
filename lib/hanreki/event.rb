@@ -26,6 +26,7 @@ class Event
   def self.from_master(month, line)
     event = Event.new({})
     first_day = Date.parse("#{month}01")
+    raise ArgumentError, 'invalid number of columns' unless line.length == 7
     day, dow, hour_start, hour_end, public_summary, private_summary, url = line.fields.map { |c| c.to_s.strip }
     # Zero-fill (eg. 1 -> 01, 02 -> 02)
     day = day.rjust(2, "0")
