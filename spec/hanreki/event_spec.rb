@@ -15,7 +15,9 @@ describe Event do
     context 'when a line is correctly formatted (a day is zero-filled)' do
       let(:row) { CSV::Row.new([], ['01', '木', '15:00', '20:00', 'Open', '@ymyzk @tanishiking', 'https://camph.net']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 3, '201510', row)
+      }
 
       it 'works' do
         expect(subject).to eq(described_class.new(
@@ -31,7 +33,9 @@ describe Event do
     context 'when a line is correct format (a day is NOT zero-filled)' do
       let(:row) { CSV::Row.new([], ['1', '木', '15:00', '20:00', 'Open', '@ymyzk @tanishiking', 'https://camph.net']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 3, '201510', row)
+      }
 
       it 'works' do
         expect(subject).to eq(described_class.new(
@@ -47,7 +51,9 @@ describe Event do
     context 'when a line is correctly formatted (a private summary is empty)' do
       let(:row) { CSV::Row.new([], ['1', '木', '18:00', '20:00', 'Event', '', '']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 13, '201510', row)
+      }
 
       it 'works' do
         expect(subject).to eq(described_class.new(
@@ -63,7 +69,9 @@ describe Event do
     context 'when a line is correctly formatted (a public summary is empty)' do
       let(:row) { CSV::Row.new([], ['1', '木', '00:00', '00:00', '', 'Closed', '']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 13, '201510', row)
+      }
 
       it 'works' do
         expect(subject).to eq(described_class.new(
@@ -127,7 +135,9 @@ describe Event do
     context 'when a public_summary is not set' do
       let(:row) { CSV::Row.new([], ['15', '木', '15:00', '20:00', '', '@ymyzk @tanishiking', 'https://camph.net']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 13, '201510', row)
+      }
 
       it 'works & public_summary is expected to be nil' do
         expect(subject).to eq(described_class.new(
@@ -143,7 +153,9 @@ describe Event do
     context 'when a private_summary is not set' do
       let(:row) { CSV::Row.new([], ['1', '木', '15:00', '20:00', 'Open', '', 'https://camph.net']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 13, '201510', row)
+      }
 
       it 'works & private_summary is expected to be nil' do
         expect(subject).to eq(described_class.new(
@@ -159,7 +171,9 @@ describe Event do
     context 'when a url is not set' do
       let(:row) { CSV::Row.new([], ['1', '木', '15:00', '20:00', 'Open', '@ryota-ka', '']) }
 
-      subject { described_class.from_master('201510', row) }
+      subject {
+        described_class.from_master('master/201510.csv', 13, '201510', row)
+      }
 
       it 'works & url is expected to be nil' do
         expect(subject).to eq(described_class.new(
@@ -203,7 +217,7 @@ describe Event do
     context 'when type is unexpected one' do
       subject { -> { event.to_h :undefined } }
 
-      it { is_expected.to raise_error(ArgumentError) }
+      it { is_expected.to raise_error(ValidationError) }
     end
 
     context 'when time_type is string' do
@@ -265,7 +279,7 @@ describe Event do
 
       subject { -> { event.validate } }
 
-      it { is_expected.to raise_error(ArgumentError) }
+      it { is_expected.to raise_error(ValidationError) }
     end
 
     context 'when public summary is "Open"' do
@@ -282,7 +296,7 @@ describe Event do
 
         subject { -> { event.validate } }
 
-        it { is_expected.to raise_error(ArgumentError) }
+        it { is_expected.to raise_error(ValidationError) }
       end
     end
 
@@ -310,7 +324,7 @@ describe Event do
 
         subject { -> { event.validate } }
 
-        it { is_expected.to raise_error(ArgumentError) }
+        it { is_expected.to raise_error(ValidationError) }
       end
 
       context 'when start is not 0:00' do
@@ -321,7 +335,7 @@ describe Event do
 
         subject { -> { event.validate } }
 
-        it { is_expected.to raise_error(ArgumentError) }
+        it { is_expected.to raise_error(ValidationError) }
       end
 
       context 'when end is not 0:00' do
@@ -332,7 +346,7 @@ describe Event do
 
         subject { -> { event.validate } }
 
-        it { is_expected.to raise_error(ArgumentError) }
+        it { is_expected.to raise_error(ValidationError) }
       end
     end
 
@@ -341,7 +355,7 @@ describe Event do
 
       subject { -> { event.validate } }
 
-      it { is_expected.to raise_error(ArgumentError) }
+      it { is_expected.to raise_error(ValidationError) }
     end
   end
 end

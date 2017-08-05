@@ -35,7 +35,7 @@ class Schedule
     @events = Dir.glob('master/*.csv').flat_map do |f|
       month = f.match(/master\/(\d+).csv/)[1]
       CSV.open(f, headers: true) do |csv|
-        csv.map { |line| Event.from_master(month, line) }
+        csv.map { |row| Event.from_master(f, $., month, row) }
       end
     end
   end

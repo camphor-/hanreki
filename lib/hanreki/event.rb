@@ -1,10 +1,12 @@
 require 'icalendar'
+require 'hanreki/exceptions'
 require 'hanreki/time_util'
 
 # Event of CAMPHOR- Schedule
 class Event
   using ExtendTime
   DOWS = %w(日 月 火 水 木 金 土)
+  attr_accessor :filename, :line_number, :row
   attr_accessor :start, :end
   attr_accessor :public_summary, :private_summary
   attr_accessor :url
@@ -23,30 +25,34 @@ class Event
   # month: String (e.g. 201510)
   # line: CSV::Row
   # (eg. [01, 水, 15:00, 20:00, "HOUSE 開館", "HOUSE 当番 @ivstivs", https://camph.net])
-  def self.from_master(month, line)
-    event = Event.new({})
+  def self.from_master(filename, line_number, month, line)
+    event = Event.new({
+      row: line,
+      filename: filename,
+      line_number: line_number,
+    })
     first_day = Date.parse("#{month}01")
-    raise ArgumentError, 'invalid number of columns' unless line.length == 7
+    raise ValidationError.new(event), 'invalid number of columns' unless line.length == 7
     day, dow, hour_start, hour_end, public_summary, private_summary, url = line.fields.map { |c| c.to_s.strip }
     # Zero-fill (eg. 1 -> 01, 02 -> 02)
     day = day.rjust(2, "0")
-    raise ArgumentError, 'invalid day' unless day.length == 2
-    raise ArgumentError, 'invalid day' unless (first_day...first_day.next_month).include?(Date.parse("#{month}#{day}"))
+    raise ValidationError.new(event), 'invalid day' unless day.length == 2
+    raise ValidationError.new(event), 'invalid day' unless (first_day...first_day.next_month).include?(Date.parse("#{month}#{day}"))
     event.start = Time.parse("#{month}#{day} #{hour_start} +09:00").getlocal("+09:00")
     event.end = Time.parse("#{month}#{day} #{hour_end} +09:00").getlocal("+09:00")
     event.public_summary = public_summary unless public_summary.empty?
     event.private_summary = private_summary unless private_summary.empty?
     event.url = url unless url.empty?
     # 曜日はインスタンス変数に保持しないのでここでチェックする
-    raise ArgumentError, 'invalid day of the week' unless DOWS.include? dow
-    raise ArgumentError, 'invalid day of the week' unless DOWS[event.start.wday] == dow
+    raise ValidationError.new(event), 'invalid day of the week' unless DOWS.include? dow
+    raise ValidationError.new(event), 'invalid day of the week' unless DOWS[event.start.wday] == dow
     event.validate
     event
   end
 
   def to_h(type, time_type = :time)
-    fail ArgumentError, 'Invalid type' unless [:public, :private].include?(type)
-    fail ArgumentError, 'Invalid time_type' unless [:time, :string].include?(time_type)
+    fail ValidationError.new(self), 'invalid type' unless [:public, :private].include?(type)
+    fail ValidationError.new(self), 'invalid time_type' unless [:time, :string].include?(time_type)
     hash = {
       start: @start,
       end: @end,
@@ -83,35 +89,35 @@ class Event
   # イベントのバリデーションを行う
   # バリデーションに成功した場合は true を返し, 失敗した場合は例外を送出する
   def validate
-    raise ArgumentError, 'invalid start & end' if @start > @end
+    raise ValidationError.new(self), 'invalid start & end' if @start > @end
 
     if @public_summary.nil? and @private_summary.nil?
-      raise ArgumentError, 'both summaries are not set'
+      raise ValidationError.new(self), 'both summaries are not set'
     end
 
     if @public_summary == 'Open'
       if @start == @end
-        raise ArgumentError, '"open" event should have duration'
+        raise ValidationError.new(self), '"open" event should have duration'
       end
     end
 
     if @private_summary == 'Closed'
       if not @public_summary.nil?
-        raise ArgumentError, 'invalid public summary for a closed event'
+        raise ValidationError.new(self), 'invalid public summary for a closed event'
       end
 
       if not @start.is_midnight_in_jst
-        raise ArgumentError, 'start must be 0:00 for a closed event'
+        raise ValidationError.new(self), 'start must be 0:00 for a closed event'
       end
 
       if not @end.is_midnight_in_jst
-        raise ArgumentError, 'end must be 0:00 for a closed event'
+        raise ValidationError.new(self), 'end must be 0:00 for a closed event'
       end
     end
 
     unless @url.nil?
       unless @url.start_with?('http://') or @url.start_with?('https://')
-        raise ArgumentError, 'invalid url scheme'
+        raise ValidationError.new(self), 'invalid url scheme'
       end
     end
 
