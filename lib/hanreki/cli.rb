@@ -1,5 +1,6 @@
 require 'date'
 require 'thor'
+require 'hanreki/exceptions'
 require 'hanreki/schedule'
 require 'hanreki/time_util'
 require 'hanreki/version'
@@ -31,8 +32,7 @@ module Hanreki
 
     desc 'sync', 'Sync iCal, JSON, and JSONP'
     def sync
-      schedule = Schedule.new
-      schedule.load_master_files
+      schedule = load_schedule
       schedule.out_ical
       schedule.out_json
       schedule.out_jsonp
@@ -41,11 +41,7 @@ module Hanreki
     desc 'validate', 'Validate master files'
     def validate
       schedule = Schedule.new
-      begin
-        schedule.load_master_files
-      rescue => e
-        raise "validation error: #{e}"
-      end
+      schedule = load_schedule
     end
 
     desc 'version', 'Show the version information'
@@ -55,6 +51,24 @@ module Hanreki
     map '--version' => :version
 
     private
+
+    def load_schedule()
+      schedule = Schedule.new
+      begin
+        schedule.load_master_files
+      rescue ValidationError => e
+        message = 'validation error'
+        if e.event
+          message += " at line #{e.event.line_number}" if e.event.line_number
+          message += " in #{e.event.filename}" if e.event.filename
+          message += "\n#{e.event.row.to_s.strip}" if e.event.row
+        end
+        message += "\n#{e}"
+        puts message
+        exit 1
+      end
+      schedule
+    end
 
     # Parse a string (YYYYMM) in options[:date] and returns [YYYY, MM]
     def parse_month_in_options(options, default = nil)
