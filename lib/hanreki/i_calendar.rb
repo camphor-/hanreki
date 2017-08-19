@@ -19,8 +19,8 @@ class ICalendar
   end
 
   def set_event(event, type)
-    fail ArgumentError, 'Invalid date' unless event.start && event.end
-    fail ArgumentError, 'Invalid type' unless [:public, :private].include?(type)
+    fail ValidationError.new(event), 'invalid date' unless event.start && event.end
+    fail ValidationError.new(event), 'invalid type' unless [:public, :private].include?(type)
     @calendar.event do |e|
       e.dtstart = event.start
       e.dtend = event.end
