@@ -5,6 +5,11 @@
 
 Simple schedule manager for [CAMPHOR-](https://camph.net/)
 
+## Features
+- Manage public & private schedules
+- Manage events using simple CSV master files
+- Convert master files to iCal and JSON files
+
 ## Installation
 ### Gem
 Install hanreki with gem command:
@@ -26,6 +31,23 @@ And then execute:
 
 ## Usage
 Run `hanreki help` or `bundle exec hanreki help`.
+
+### Create a master file
+`hanreki blank` generates a master file for the next month.
+
+### Sync
+`hanreki sync` generates iCal and JSON files from master files.
+
+### Edit
+`hanreki edit` opens a editor and validates master files.
+Hanreki chooses the editor in the following order:
+
+1. Editor specified by the environment variable: `CAMPHOR_SCHEDULE_EDITOR`
+2. Editor specified by the environment variable: `EDITOR`
+3. `vi`
+
+### Validation
+`hanreki validate` validates master files.
 
 ## Development
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bundle exec rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
