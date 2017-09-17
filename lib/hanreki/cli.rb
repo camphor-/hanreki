@@ -30,12 +30,11 @@ module Hanreki
       validate
     end
 
-    desc 'sync', 'Sync iCal, JSON, and JSONP'
+    desc 'sync', 'Sync iCal and JSON'
     def sync
       schedule = load_schedule
       schedule.out_ical
       schedule.out_json
-      schedule.out_jsonp
     end
 
     desc 'validate', 'Validate master files'

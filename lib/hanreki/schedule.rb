@@ -13,8 +13,6 @@ class Schedule
   ICAL_PRIVATE_PATH = 'ical/camphor_private_events.ics'
   JSON_PUBLIC_PATH = 'json/camphor_public_events.json'
   JSON_PRIVATE_PATH = 'json/camphor_private_events.json'
-  JSONP_PUBLIC_PATH = 'jsonp/camphor_public_events.js'
-  JSONP_PRIVATE_PATH = 'jsonp/camphor_private_events.js'
   JSON_SCHEMA_PATH = File.expand_path('../schema.json', __FILE__)
 
   def initialize
@@ -61,16 +59,6 @@ class Schedule
     end
     File.open(JSON_PRIVATE_PATH, 'w') do |f|
       f.write(events_to_json(private_events, :private, validate: true))
-    end
-  end
-
-  # Output private and public JSONP calendar files
-  def out_jsonp(callback = 'callback')
-    File.open(JSONP_PUBLIC_PATH, 'w') do |f|
-      f.write("#{callback}(#{events_to_json(public_events, :public)});")
-    end
-    File.open(JSONP_PRIVATE_PATH, 'w') do |f|
-      f.write("#{callback}(#{events_to_json(private_events, :private)});")
     end
   end
 
