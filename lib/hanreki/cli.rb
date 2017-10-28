@@ -33,6 +33,7 @@ module Hanreki
     desc 'sync', 'Sync iCal and JSON'
     def sync
       schedule = load_schedule
+      schedule.sort_by_date!
       schedule.out_ical
       schedule.out_json
     end
