@@ -76,6 +76,10 @@ class Schedule
     File.exists? file_path
   end
 
+  def sort_by_date!
+    @events.sort_by! { |e| [e.start, e.end] }
+  end
+
   private
 
   def file_path
