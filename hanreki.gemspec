@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.2.0'
 
-  spec.add_dependency 'thor', '~> 0.19'
+  spec.add_dependency 'thor', '>= 0.19', '< 2.0'
   spec.add_dependency 'icalendar', '~> 2.3'
   spec.add_dependency 'json-schema', '~> 2.7'
 
