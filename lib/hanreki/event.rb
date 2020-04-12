@@ -101,6 +101,12 @@ class Event
       end
     end
 
+    if @public_summary == 'Online Open'
+      if @start == @end
+        raise ValidationError.new(self), '"online open" event should have duration'
+      end
+    end
+
     if @private_summary == 'Closed'
       if not @public_summary.nil?
         raise ValidationError.new(self), 'invalid public summary for a closed event'
