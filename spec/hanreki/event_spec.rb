@@ -196,10 +196,7 @@ describe Event do
           title: 'Open',
           start: Time.new(2015, 10, 1, 13, 0, 0, '+09:00'),
           end: Time.new(2015, 10, 1, 17, 0, 0, '+09:00'),
-          url: nil,
-          make_start: nil,
-          make_end: nil,
-          make_title: nil
+          url: nil
         })
       end
     end
@@ -212,10 +209,7 @@ describe Event do
           title: '@ymyzk',
           start: Time.new(2015, 10, 1, 13, 0, 0, '+09:00'),
           end: Time.new(2015, 10, 1, 17, 0, 0, '+09:00'),
-          url: nil,
-          make_start: nil,
-          make_end: nil,
-          make_title: nil
+          url: nil
         })
       end
     end
@@ -234,10 +228,7 @@ describe Event do
           title: 'Open',
           start: '2015-10-01T13:00:00+09:00',
           end: '2015-10-01T17:00:00+09:00',
-          url: nil,
-          make_start: nil,
-          make_end: nil,
-          make_title: nil
+          url: nil
         })
       end
     end

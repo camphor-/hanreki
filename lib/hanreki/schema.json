@@ -6,12 +6,6 @@
       "type": "object",
       "properties": {
         "title": {"type": "string"},
-        "make_title": {
-          "anyOf": [
-            {"type": "string"},
-            {"type": "null"}
-          ]
-        },
         "start": {
           "type": "string",
           "format": "date-time"
@@ -23,18 +17,6 @@
         "url": {
           "anyOf": [
             {"type": "string"},
-            {"type": "null"}
-          ]
-        },
-        "make_start": {
-          "anyOf": [
-            {"type": "string", "format": "date-time"},
-            {"type": "null"}
-          ]
-        },
-        "make_end": {
-          "anyOf": [
-            {"type": "string", "format": "date-time"},
             {"type": "null"}
           ]
         }

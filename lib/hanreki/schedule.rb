@@ -43,13 +43,11 @@ class Schedule
     File.open(ICAL_PUBLIC_PATH, 'w') do |f|
       ical = ICalendar.new
       public_events.each { |event| ical.set_event(event, :public) }
-      public_make_events.each { |event| ical.set_make_event(event, :make_public) }
       f.write(ical)
     end
     File.open(ICAL_PRIVATE_PATH, 'w') do |f|
       ical = ICalendar.new
       private_events.each { |event| ical.set_event(event, :private) }
-      private_make_events.each { |event| ical.set_make_event(event, :make_private) }
       f.write(ical)
     end
   end
@@ -57,10 +55,10 @@ class Schedule
   # Output private and public JSON calendar files
   def out_json
     File.open(JSON_PUBLIC_PATH, 'w') do |f|
-      f.write(events_to_json(public_events_for_json, :public, validate: true))
+      f.write(events_to_json(public_events, :public, validate: true))
     end
     File.open(JSON_PRIVATE_PATH, 'w') do |f|
-      f.write(events_to_json(private_events_for_json, :private, validate: true))
+      f.write(events_to_json(private_events, :private, validate: true))
     end
   end
 
@@ -114,24 +112,8 @@ class Schedule
     @events.select(&:public?)
   end
 
-  def public_make_events
-    @events.select(&:make_public?)
-  end
-
-  def public_events_for_json
-    @events.select{ |e| e.public? || e.make_public? }
-  end
-
   def private_events
     @events.select(&:private?)
-  end
-
-  def private_make_events
-    @events.select(&:make_private?)
-  end
-
-  def private_events_for_json
-    @events.select{ |e| e.private? || e.make_private? }
   end
 
   def events_to_json(events, type, validate = false)
