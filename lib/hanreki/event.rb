@@ -10,6 +10,8 @@ class Event
   attr_accessor :start, :end
   attr_accessor :public_summary, :private_summary
   attr_accessor :url
+  attr_accessor :make_start, :make_end
+  attr_accessor :make_public_summary, :make_private_summary
 
   def initialize(attributes)
     # Create assign methods for event attributes
@@ -32,8 +34,16 @@ class Event
       line_number: line_number,
     })
     first_day = Date.parse("#{month}01")
-    raise ValidationError.new(event), 'invalid number of columns' unless line.length == 7
-    day, dow, hour_start, hour_end, public_summary, private_summary, url = line.fields.map { |c| c.to_s.strip }
+    raise ValidationError.new(event), 'invalid number of columns' unless line.length == 7 || line.length == 11
+    if line.length == 7
+      day, dow, hour_start, hour_end, public_summary, private_summary, url = line.fields.map { |c| c.to_s.strip }
+    else
+      day, dow, hour_start, hour_end, public_summary, private_summary, url, make_hour_start, make_hour_end, make_public_summary, make_private_summary = line.fields.map { |c| c.to_s.strip }
+      event.make_start = Time.parse("#{month}#{day} #{make_hour_start} +09:00").getlocal("+09:00")
+      event.make_end = Time.parse("#{month}#{day} #{make_hour_end} +09:00").getlocal("+09:00")
+      event.make_public_summary = make_public_summary unless make_public_summary.empty?
+      event.make_private_summary = make_private_summary unless make_private_summary.empty?
+    end
     # Zero-fill (eg. 1 -> 01, 02 -> 02)
     day = day.rjust(2, "0")
     raise ValidationError.new(event), 'invalid day' unless day.length == 2
@@ -56,15 +66,23 @@ class Event
     hash = {
       start: @start,
       end: @end,
-      url: @url
+      url: @url,
+      make_start: @make_start,
+      make_end: @make_end
     }
     case type
-    when :public then hash[:title] = @public_summary
-    when :private then hash[:title] = @private_summary
+    when :public
+      hash[:title] = @public_summary
+      hash[:make_title] = @make_public_summary
+    when :private
+      hash[:title] = @private_summary
+      hash[:make_title] = @make_private_summary
     end
     if time_type == :string
-      hash[:start] = hash[:start].iso8601
-      hash[:end] = hash[:end].iso8601
+      hash[:start] = hash[:start].iso8601 unless hash[:start].nil?
+      hash[:end] = hash[:end].iso8601 unless hash[:end].nil?
+      hash[:make_start] = hash[:make_start].iso8601 unless hash[:make_start].nil?
+      hash[:make_end] = hash[:make_end].iso8601 unless hash[:make_end].nil?
     end
     hash
   end
@@ -82,8 +100,16 @@ class Event
     !@private_summary.nil?
   end
 
+  def make_private?
+    !@make_private_summary.nil?
+  end
+
   def public?
     !@public_summary.nil?
+  end
+
+  def make_public?
+    !@make_public_summary.nil?
   end
 
   # イベントのバリデーションを行う
