@@ -101,6 +101,12 @@ class Event
       end
     end
 
+    if @public_summary == 'Make'
+      if @start == @end
+        raise ValidationError.new(self), '"make" event should have duration'
+      end
+    end
+
     if @public_summary == 'Online Open'
       if @start == @end
         raise ValidationError.new(self), '"online open" event should have duration'
