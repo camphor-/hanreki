@@ -32,17 +32,6 @@ class ICalendar
     end
   end
 
-  def set_make_event(event, type)
-    @calendar.event do |e|
-      e.dtstart = event.make_start
-      e.dtend = event.make_end
-      case type
-      when :make_public then e.summary = event.make_public_summary
-      when :make_private then e.summary = event.make_private_summary
-      end
-    end
-  end
-
   private
 
   # Generate new calendar
