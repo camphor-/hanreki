@@ -1,6 +1,5 @@
 # Hanreki
 
-[![Build Status](https://travis-ci.org/camphor-/hanreki.svg?branch=master)](https://travis-ci.org/camphor-/hanreki)
 [![Gem Version](https://badge.fury.io/rb/hanreki.svg)](https://badge.fury.io/rb/hanreki)
 
 Simple schedule manager for [CAMPHOR-](https://camph.net/)
