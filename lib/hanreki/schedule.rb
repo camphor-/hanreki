@@ -1,19 +1,21 @@
-require 'csv'
-require 'date'
-require 'json'
-require 'json-schema'
-require 'hanreki/event'
-require 'hanreki/i_calendar'
-require 'hanreki/time_util'
+# frozen_string_literal: true
+
+require "csv"
+require "date"
+require "json"
+require "json-schema"
+require "hanreki/event"
+require "hanreki/i_calendar"
+require "hanreki/time_util"
 
 # Schedule for CAMPHOR- HOUSE assignments and other events
 class Schedule
   using ExtendTime
-  ICAL_PUBLIC_PATH = 'ical/camphor_public_events.ics'
-  ICAL_PRIVATE_PATH = 'ical/camphor_private_events.ics'
-  JSON_PUBLIC_PATH = 'json/camphor_public_events.json'
-  JSON_PRIVATE_PATH = 'json/camphor_private_events.json'
-  JSON_SCHEMA_PATH = File.expand_path('../schema.json', __FILE__)
+  ICAL_PUBLIC_PATH = "ical/camphor_public_events.ics"
+  ICAL_PRIVATE_PATH = "ical/camphor_private_events.ics"
+  JSON_PUBLIC_PATH = "json/camphor_public_events.json"
+  JSON_PRIVATE_PATH = "json/camphor_private_events.json"
+  JSON_SCHEMA_PATH = File.expand_path("../schema.json", __FILE__)
 
   def initialize
     # マスターファイルを生成する際のファイル名の決定に使用
@@ -30,7 +32,7 @@ class Schedule
 
   # マスターファイルを読み込んで @events に設定する
   def load_master_files
-    @events = Dir.glob('master/*.csv').flat_map do |f|
+    @events = Dir.glob("master/*.csv").flat_map do |f|
       month = f.match(/master\/(\d+).csv/)[1]
       CSV.open(f, headers: true) do |csv|
         csv.map { |row| Event.from_master(f, $., month, row) }
@@ -40,12 +42,12 @@ class Schedule
 
   # Output private and public iCal calendar files
   def out_ical
-    File.open(ICAL_PUBLIC_PATH, 'w') do |f|
+    File.open(ICAL_PUBLIC_PATH, "w") do |f|
       ical = ICalendar.new
       public_events.each { |event| ical.set_event(event, :public) }
       f.write(ical)
     end
-    File.open(ICAL_PRIVATE_PATH, 'w') do |f|
+    File.open(ICAL_PRIVATE_PATH, "w") do |f|
       ical = ICalendar.new
       private_events.each { |event| ical.set_event(event, :private) }
       f.write(ical)
@@ -54,18 +56,14 @@ class Schedule
 
   # Output private and public JSON calendar files
   def out_json
-    File.open(JSON_PUBLIC_PATH, 'w') do |f|
-      f.write(events_to_json(public_events, :public, validate: true))
-    end
-    File.open(JSON_PRIVATE_PATH, 'w') do |f|
-      f.write(events_to_json(private_events, :private, validate: true))
-    end
+    File.write(JSON_PUBLIC_PATH, events_to_json(public_events, :public, validate: true))
+    File.write(JSON_PRIVATE_PATH, events_to_json(private_events, :private, validate: true))
   end
 
   # Output master file
   def out_master
     CSV.open(
-      file_path, 'w',
+      file_path, "w",
       headers: Event.master_header, write_headers: true
     ) do |master_file|
       @events.each { |event| master_file << event.to_master }
@@ -73,7 +71,7 @@ class Schedule
   end
 
   def master_file_exists?
-    File.exists? file_path
+    File.exist? file_path
   end
 
   def sort_by_date!
@@ -83,7 +81,7 @@ class Schedule
   private
 
   def file_path
-    "master/#{@first_day_of_month.strftime('%Y%m')}.csv".freeze
+    "master/#{@first_day_of_month.strftime("%Y%m")}.csv".freeze
   end
 
   def initialize_assignments(year, month)
@@ -91,7 +89,7 @@ class Schedule
       begin
         Date.new(year, month, 1)
       rescue TypeError
-        raise ArgumentError, 'Invalid year and month'
+        raise ArgumentError, "Invalid year and month"
       end
 
     days = @first_day_of_month...@first_day_of_month.next_month
@@ -100,12 +98,13 @@ class Schedule
 
   def default_assignment(date)
     # Set timezone explicitly (DO NOT use date.to_time, it uses local timezone)
-    time = Time.new(date.year, date.month, date.day, 0, 0, 0, '+09:00')
+    time = Time.new(date.year, date.month, date.day, 0, 0, 0, "+09:00")
     Event.new(
       start: time,
       end: time.next_day(1),
-      public_summary: '',
-      private_summary: 'Closed')
+      public_summary: "",
+      private_summary: "Closed"
+    )
   end
 
   def public_events

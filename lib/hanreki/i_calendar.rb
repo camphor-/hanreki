@@ -1,5 +1,7 @@
-require 'icalendar'
-require 'hanreki/time_util'
+# frozen_string_literal: true
+
+require "icalendar"
+require "hanreki/time_util"
 
 # iCal
 class ICalendar
@@ -19,8 +21,8 @@ class ICalendar
   end
 
   def set_event(event, type)
-    fail ValidationError.new(event), 'invalid date' unless event.start && event.end
-    fail ValidationError.new(event), 'invalid type' unless [:public, :private].include?(type)
+    fail ValidationError.new(event), "invalid date" unless event.start && event.end
+    fail ValidationError.new(event), "invalid type" unless [:public, :private].include?(type)
     @calendar.event do |e|
       e.dtstart = event.start
       e.dtend = event.end
@@ -36,19 +38,19 @@ class ICalendar
 
   # Generate new calendar
   def make_blank
-    @calendar.append_custom_property('X-WR-CALNAME', 'CAMPHOR- Events')
+    @calendar.append_custom_property("X-WR-CALNAME", "CAMPHOR- Events")
     set_timezone
   end
 
   def set_timezone
     # TODO: Rewrite with tzinfo
     @calendar.timezone do |t|
-      t.tzid = 'Asia/Tokyo'
+      t.tzid = "Asia/Tokyo"
       t.standard do |s|
-        s.tzoffsetfrom = '+0900'
-        s.tzoffsetto   = '+0900'
-        s.tzname       = 'JST'
-        s.dtstart      = '19700101T000000'
+        s.tzoffsetfrom = "+0900"
+        s.tzoffsetto = "+0900"
+        s.tzname = "JST"
+        s.dtstart = "19700101T000000"
       end
     end
   end

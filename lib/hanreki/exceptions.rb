@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ValidationError < StandardError
   attr_reader :event
 
