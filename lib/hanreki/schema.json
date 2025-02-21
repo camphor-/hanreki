@@ -5,7 +5,7 @@
     {
       "type": "object",
       "properties": {
-        "title": {"type": "string"},
+        "title": { "type": "string" },
         "start": {
           "type": "string",
           "format": "date-time"
@@ -15,10 +15,7 @@
           "format": "date-time"
         },
         "url": {
-          "anyOf": [
-            {"type": "string"},
-            {"type": "null"}
-          ]
+          "anyOf": [{ "type": "string" }, { "type": "null" }]
         }
       },
       "required": ["title", "start", "end", "url"]

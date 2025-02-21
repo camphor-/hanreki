@@ -1,7 +1,7 @@
-require 'spec_helper'
+# frozen_string_literal: true
 
-describe Hanreki do
-  it 'has a version number' do
+RSpec.describe Hanreki do
+  it "has a version number" do
     expect(Hanreki::VERSION).not_to be nil
   end
 end
